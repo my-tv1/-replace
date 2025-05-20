@@ -1,0 +1,36 @@
+name: Replace @ with Comma
+
+on:
+  workflow_dispatch:  # 允许手动触发
+  schedule:
+    - cron: '0 0 * * *'  # 每天UTC午夜运行(可选)
+  push:
+    paths:
+      - 'replace_at_with_comma.py'  # 当Python文件变更时触发
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Install dependencies
+      run: pip install requests
+      
+    - name: Run replacement script
+      run: python replace_at_with_comma.py
+      
+    - name: Commit changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add modified_file.txt
+        git diff --quiet && git diff --staged --quiet || git commit -m "Auto-replace @ with ,"
+        git push
